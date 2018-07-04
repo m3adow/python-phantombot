@@ -64,7 +64,7 @@ class PhantomBotRestAPI(object):
     def get_poll_result(self):
         poll_title = self.api_query_db(payload={'table': 'pollPanel', 'getData': 'title'})['value']
         poll_status = self.db_get_data(table='pollPanel', key='isActive')
-        poll_result = self.db_get_table_data(table='pollVotes')
+        poll_result = {key: int(value) for key, value in self.db_get_table_data(table='pollVotes').items()}
 
         return {'title': poll_title, 'active': poll_status, 'result': poll_result}
 
