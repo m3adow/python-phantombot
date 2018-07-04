@@ -47,18 +47,16 @@ class PhantomBotRestAPI(object):
         return table_data
 
     # Polling stuff
-    def open_poll(self, question, options, duration=None, min_votes=None):
+    def open_poll(self, title, options, duration=None, min_votes=None):
+        # Refactor min_votes or duration being 0 or False
         if not min_votes:
             min_votes = ''
         if not duration:
             duration = ''
 
-        req = '!poll open "{question}" "{options}" {duration} {min_votes}'.format(
-            question=question, options=', '.join(str(option) for option in options), duration=duration,
-            min_votes=min_votes
-        )
-        logger.debug(req)
-        return self.api_put(req)
+        return self.api_put(message='!poll open "{question}" "{options}" {duration} {min_votes}'.format(
+            question=title, options=', '.join(str(option) for option in options), duration=duration,
+            min_votes=min_votes))
 
     def close_poll(self):
         return self.api_put('!poll close')
