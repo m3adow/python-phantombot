@@ -45,6 +45,22 @@ class PhantomBotRestAPI(object):
             table_data[key] = self.db_get_data(table=table, key=key)
         return table_data
 
+
+@attr.s
+class PhantomBotAPI(object):
+    url = attr.ib()
+    user = attr.ib()
+    webauth = attr.ib()
+    requests_kwargs = attr.ib(default=attr.Factory(dict))
+
+    pbrest = attr.ib()
+
+    @pbrest.default
+    def initialize_pbrest(self):
+        return PhantomBotRestAPI(
+            url=self.url, user=self.user, webauth=self.webauth, requests_kwargs=self.requests_kwargs
+        )
+
     # Polling stuff
     def open_poll(self, title, options, duration=None, min_votes=None):
         # Refactor min_votes or duration being 0 or False
@@ -53,19 +69,28 @@ class PhantomBotRestAPI(object):
         if not duration:
             duration = ''
 
-        return self.api_put(message='!poll open "{question}" "{options}" {duration} {min_votes}'.format(
+        return self.pbrest.api_put(message='!poll open "{question}" "{options}" {duration} {min_votes}'.format(
             question=title, options=', '.join(str(option) for option in options), duration=duration,
             min_votes=min_votes))
 
     def close_poll(self):
-        return self.api_put('!poll close')
+        return self.pbrest.api_put('!poll close')
 
     def get_poll_result(self):
-        poll_title = self.api_query_db(payload={'table': 'pollPanel', 'getData': 'title'})['value']
-        poll_status = self.db_get_data(table='pollPanel', key='isActive')
-        poll_result = {key: int(value) for key, value in self.db_get_table_data(table='pollVotes').items()}
+        poll_title = self.pbrest.api_query_db(payload={'table': 'pollPanel', 'getData': 'title'})['value']
+        poll_status = self.pbrest.db_get_data(table='pollPanel', key='isActive')
+        poll_result = {key: int(value) for key, value in self.pbrest.db_get_table_data(table='pollVotes').items()}
 
         return {'title': poll_title, 'active': poll_status, 'result': poll_result}
 
+    # Stream title stuff
+    def get_stream_title(self):
+        return self.pbrest.db_get_data('streamInfo', 'title')
 
+    def set_stream_title(self, title):
+        return self.pbrest.api_put('!settitle {title}'.format(title=title))
+
+    # Twitter stuff
+    def post_twitter_message(self, message):
+        return self.pbrest.api_put('!twitter post {msg}'.format(msg=message))
 
