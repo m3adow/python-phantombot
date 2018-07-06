@@ -10,7 +10,7 @@ class PhantomBotRestAPI(object):
     url = attr.ib()
     user = attr.ib()
     webauth = attr.ib()
-    requests_kwargs = attr.ib(default={})
+    requests_kwargs = attr.ib(default=attr.Factory(dict))
 
     _req_default_header = attr.ib()
 
