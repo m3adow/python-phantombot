@@ -1,6 +1,7 @@
 import logging
-import requests
+
 import attr
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +11,7 @@ class PhantomBotRestAPI(object):
     url = attr.ib()
     user = attr.ib()
     webauth = attr.ib()
-    requests_kwargs = attr.ib(default=attr.Factory(dict))
+    requests_kwargs = attr.ib(factory=dict)
 
     _req_default_header = attr.ib()
 
