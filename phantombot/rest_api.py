@@ -22,13 +22,23 @@ class PhantomBotRestAPI(object):
             'webauth': self.webauth
         }
 
+    @staticmethod
+    def _req(req_method, *args, **kwargs):
+        return getattr(requests, req_method)(*args, **kwargs)
+
+    def _api_put(self, *args, **kwargs):
+        return self._req('put', *args, **kwargs)
+
+    def _api_get(self, *args, **kwargs):
+        return self._req('get', *args, **kwargs)
+
     def api_put(self, message, api_path=''):
         headers = self._req_default_header.copy()
         headers['message'] = message
-        return requests.put(url=self.url + api_path, headers=headers, **self.requests_kwargs)
+        return self._api_put(url=self.url + api_path, headers=headers, **self.requests_kwargs)
 
     def api_get(self, payload, api_path=''):
-        return requests.get(url='{url}/{path}'.format(url=self.url, path=api_path),
+        return self._api_get(url='{url}/{path}'.format(url=self.url, path=api_path),
                             headers=self._req_default_header, params=payload)
 
     def api_query_db(self, payload):
@@ -94,4 +104,3 @@ class PhantomBotAPI(object):
     # Twitter stuff
     def post_twitter_message(self, message):
         return self.pbrest.api_put('!twitter post {msg}'.format(msg=message))
-
